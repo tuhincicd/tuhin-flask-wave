@@ -41,7 +41,7 @@ publicIP=$( aws ec2 describe-instances --instance-ids "$instance"  --output text
 echo "Configuring instance: $instance"
 echo "Private IP: $privateIP"
 echo "Public IP: $publicIP"
-echo "...waiting the instance to boot"
+echo "...waiting for the EC2 instance to boot"
 
 cycles=0
 while true
@@ -58,7 +58,7 @@ done
 echo "Testing if ansible can ping the server"
 while true
 do
-	sleep 10
+	sleep 20
 	ansible -m ping  -i $publicIP, --user=ubuntu --private-key=$KEY.pem --ssh-extra-args='-o StrictHostKeyChecking=no' all &> /dev/null
 	[[ $? -eq 0 ]] && break
 	echo "...ansible ping failed, waiting 10s more"
