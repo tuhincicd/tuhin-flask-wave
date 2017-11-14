@@ -17,7 +17,7 @@ CONTENT=`ls -l`
 echo "$CONTENT"
 PWD2=`pwd`
 
-#prep work
+# AWS prep work
 echo "Creating security group and ssh key............."
 # make sure the key file exists and the key with that name is not in AWS
 if [[ ! -f $KEY.pem ]]
@@ -33,7 +33,8 @@ aws ec2 describe-security-groups --group-names $GROUP &> /dev/null || { \
         aws ec2 authorize-security-group-ingress --group-name $GROUP --protocol tcp --port 22 --cidr 0.0.0.0/0 
         aws ec2 authorize-security-group-ingress --group-name $GROUP --protocol tcp --port 5000 --cidr 0.0.0.0/0
         } 
-#main
+#main - AWSCLI Infrastructure Deployment
+
 echo "Creating new instance ..."
 instance=$( aws ec2 run-instances --image-id ami-336b4456 --security-groups $GROUP --count 1 --instance-type t2.micro --key-name $KEY  --query 'Instances[0].InstanceId' --output text --user-data file://$PWD1/bs.sh )
 privateIP=$( aws ec2 describe-instances --instance-ids "$instance"  --output text --query 'Reservations[0].Instances[0].PrivateIpAddress' )
@@ -54,7 +55,7 @@ do
 	[[ $cycles -gt 10 ]] && { echo "Instance failed to boot in a reasonable time"; exit 1; } 
 done
 
-#make sure ansible can run, seems there is a slight delay until the instance can accept ssh connections and run commands
+#Ansible entrypoint for Configuration Management
 echo "Testing if ansible can ping the server"
 while true
 do
@@ -69,9 +70,11 @@ sleep 1
 echo "Debug: ansible-playbook -i $publicIP, --user=ubuntu --private-key=$KEY.pem --ssh-extra-args='-o StrictHostKeyChecking=no'  playbook.yaml"
 ansible-playbook -i $publicIP, --user=ubuntu --private-key=$KEY.pem --ssh-extra-args='-o StrictHostKeyChecking=no' main.yaml
 
-#fingers crossed
+#Output and Testing
+
+echo "App link would be $publicIP:5000"
 echo "Testing the service with: curl $publicIP:5000"
-echo '(drums in the background )'
 echo ""
-sleep 2
+sleep 5
 curl $publicIP:5000
+echo "Deployment Completed"
