@@ -1,0 +1,31 @@
+---
+- name: Deploy Application - Python Flask 
+  hosts: all
+  become: yes
+  become_method: sudo
+
+  vars:
+    dest_dir: /opt 
+  
+  tasks:
+
+    - name: install docker and activate
+      apt : name=docker.io state=installed update_cache=true
+
+    - name: install git
+      apt : name=git state=latest 
+    
+    - name: Create Destination Directory
+      file:
+       path: "{{ dest_dir }}/flask/hello-flask"
+       state: directory
+       recurse: yes
+
+    - name: clone the repo
+      git : repo=https://github.com/tuhincicd/tuhin-flask-wave.git  dest="{{ dest_dir }}/flask/hello-flask/"  
+
+    - name: Build Docker Image
+      command: docker build -t simple-flask-app:latest -f "{{ dest_dir }}/flask/hello-flask/Dockerfile" "{{ dest_dir }}/flask/hello-flask/"
+
+    - name: Run Docker Container
+      command: docker run -d -p 5000:5000 simple-flask-app 
