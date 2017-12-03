@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sudo apt install -y  python
+sudo apt install -y python
 
 
 
