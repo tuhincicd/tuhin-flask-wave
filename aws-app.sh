@@ -36,7 +36,7 @@ aws ec2 describe-security-groups --group-names $GROUP &> /dev/null || { \
 #main - AWSCLI Infrastructure Deployment
 
 echo "Creating new instance ..."
-instance=$( aws ec2 run-instances --image-id ami-10acfb73 --security-groups $GROUP --count 1 --instance-type t2.micro --key-name $KEY  --query 'Instances[0].InstanceId' --output text --user-data file://$PWD1/bs.sh )
+instance=$( aws ec2 run-instances --image-id ami-10acfb73 --security-groups $GROUP --count 1 --instance-type t2.micro --key-name $KEY  --query 'Instances[0].InstanceId' --output text --user-data file://$PWD2/bs.sh )
 privateIP=$( aws ec2 describe-instances --instance-ids "$instance"  --output text --query 'Reservations[0].Instances[0].PrivateIpAddress' )
 publicIP=$( aws ec2 describe-instances --instance-ids "$instance"  --output text --query 'Reservations[0].Instances[0].PublicIpAddress' )
 echo "Configuring instance: $instance"
